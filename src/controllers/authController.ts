@@ -20,11 +20,23 @@ const DEMO_USER: UserSession = {
   token: 'mock-jwt-token-droppsion-user-session',
 };
 
-const DEFAULT_ADMIN_STAFF = [
+export interface AdminStaffUser {
+  id: string;
+  name: string;
+  email: string;
+  password?: string;
+  role: 'super_admin' | 'store_manager' | 'logistics_operator';
+  avatar?: string;
+  status: 'active' | 'deactivated';
+  lastLogin?: string;
+}
+
+const DEFAULT_ADMIN_STAFF: AdminStaffUser[] = [
   {
     id: 'usr_super_01',
     name: 'Super Admin',
     email: 'admin@droppsion.com',
+    password: 'admin123',
     role: 'super_admin',
     avatar: 'SA',
     status: 'active',
@@ -34,6 +46,7 @@ const DEFAULT_ADMIN_STAFF = [
     id: 'usr_director_02',
     name: 'Store Director',
     email: 'director@droppsion.com',
+    password: 'admin123',
     role: 'store_manager',
     avatar: 'SD',
     status: 'active',
@@ -43,6 +56,7 @@ const DEFAULT_ADMIN_STAFF = [
     id: 'usr_ops_03',
     name: 'Logistics Operator',
     email: 'ops@droppsion.com',
+    password: 'admin123',
     role: 'logistics_operator',
     avatar: 'LO',
     status: 'active',
@@ -114,7 +128,12 @@ export const getMe = (req: Request, res: Response) => {
 export const adminLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+    }
+
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
 
     // Check DB first if connected
     if (isDbConnected()) {
@@ -123,6 +142,12 @@ export const adminLogin = async (req: Request, res: Response) => {
         if (dbAdmin.status === 'deactivated') {
           return res.status(403).json({ success: false, message: 'This admin account has been deactivated.' });
         }
+
+        const validPassword = dbAdmin.password || 'admin123';
+        if (cleanPassword !== validPassword) {
+          return res.status(401).json({ success: false, message: 'Invalid admin credentials. Incorrect password.' });
+        }
+
         dbAdmin.lastLogin = new Date().toISOString();
         await dbAdmin.save();
 
@@ -142,43 +167,39 @@ export const adminLogin = async (req: Request, res: Response) => {
       }
     }
 
-    // Predefined accounts or valid administrative fallback
+    // Predefined accounts fallback
     const matched = DEFAULT_ADMIN_STAFF.find((a) => a.email === cleanEmail);
     if (matched) {
       if (matched.status === 'deactivated') {
         return res.status(403).json({ success: false, message: 'This admin account has been deactivated.' });
       }
+
+      const validPassword = matched.password || 'admin123';
+      if (cleanPassword !== validPassword) {
+        return res.status(401).json({ success: false, message: 'Invalid admin credentials. Incorrect password.' });
+      }
+
       return res.json({
         success: true,
         message: 'Admin authentication successful',
         token: `token-admin-session-${Date.now()}`,
         user: {
-          ...matched,
+          id: matched.id,
+          name: matched.name,
+          email: matched.email,
+          role: matched.role,
+          avatar: matched.avatar,
+          status: matched.status,
           lastLogin: new Date().toISOString(),
         },
       });
     }
 
-    if (cleanEmail.includes('@') && password && password.length >= 4) {
-      const fallbackUser = {
-        id: `usr_${Date.now()}`,
-        name: cleanEmail.split('@')[0].replace('.', ' ').toUpperCase(),
-        email: cleanEmail,
-        role: 'super_admin' as const,
-        avatar: cleanEmail.slice(0, 2).toUpperCase(),
-        status: 'active' as const,
-        lastLogin: new Date().toISOString(),
-      };
-
-      return res.json({
-        success: true,
-        message: 'Admin authentication successful',
-        token: `token-admin-session-${Date.now()}`,
-        user: fallbackUser,
-      });
-    }
-
-    return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
+    // Strictly reject any unregistered admin accounts
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid admin credentials. Account not found.',
+    });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: 'Admin login failed', error: error.message });
   }
@@ -200,7 +221,7 @@ export const getAdminUsers = async (_req: Request, res: Response) => {
 
 export const createAdminUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, role = 'store_manager' } = req.body;
+    const { name, email, role = 'store_manager', password = 'admin123' } = req.body;
     const cleanEmail = email.trim().toLowerCase();
 
     if (isDbConnected()) {
@@ -212,13 +233,14 @@ export const createAdminUser = async (req: Request, res: Response) => {
         });
       }
 
-      const newUser = {
+      const newUser: AdminStaffUser = {
         id: `usr_staff_${Date.now().toString().slice(-4)}`,
         name: name.trim(),
         email: cleanEmail,
+        password: password.trim() || 'admin123',
         role,
         avatar: name.trim().slice(0, 2).toUpperCase(),
-        status: 'active' as const,
+        status: 'active',
         lastLogin: new Date().toISOString(),
       };
 
@@ -234,13 +256,14 @@ export const createAdminUser = async (req: Request, res: Response) => {
       });
     }
 
-    const newUser = {
+    const newUser: AdminStaffUser = {
       id: `usr_staff_${Date.now().toString().slice(-4)}`,
       name: name.trim(),
       email: cleanEmail,
+      password: password.trim() || 'admin123',
       role,
       avatar: name.trim().slice(0, 2).toUpperCase(),
-      status: 'active' as const,
+      status: 'active',
       lastLogin: new Date().toISOString(),
     };
 
