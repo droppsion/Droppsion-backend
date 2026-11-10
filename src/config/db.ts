@@ -20,7 +20,7 @@ export const connectDatabase = async (): Promise<boolean> => {
       '\n⚠️ [MongoDB] Notice: Your MONGODB_URI in backend/.env contains a placeholder (<db_username>).'
     );
     console.warn(
-      '   Please update backend/.env with your real MongoDB Atlas credentials or use a local instance (e.g. mongodb://127.0.0.1:27017/novatrend).'
+      '   Please update backend/.env with your real MongoDB Atlas credentials or use a local instance (e.g. mongodb://127.0.0.1:27017/droppsion).'
     );
     console.warn('   ⚡ Falling back to in-memory datasets so the API and Admin continue working smoothly.\n');
     return false;

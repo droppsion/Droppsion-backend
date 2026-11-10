@@ -408,7 +408,7 @@ export const createProduct = async (req: Request, res: Response) => {
     if (!productData.dropship) {
       productData.dropship = {
         supplierId: 'sup-apparel-la',
-        supplierName: 'Nova Studio Apparel',
+        supplierName: 'Droppsion Studio Apparel',
         supplierSku: productData.slug.toUpperCase(),
         supplierCost: productData.price * 0.6,
         marginPercentage: 40,

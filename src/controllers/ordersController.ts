@@ -6,8 +6,8 @@ import { isDbConnected } from '../config/db';
 // In-memory order fallback
 const ORDERS: Order[] = [
   {
-    id: 'ORD-8942-NV',
-    trackingNumber: 'NV-TRK-8942910',
+    id: 'ORD-8942-DP',
+    trackingNumber: 'DP-TRK-8942910',
     createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     status: 'shipped',
     customer: {
@@ -157,8 +157,8 @@ export const createOrder = async (req: Request, res: Response) => {
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const trackingSuffix = Math.floor(1000000 + Math.random() * 9000000);
-    const orderId = `ORD-${randomSuffix}-NV`;
-    const trackingNumber = `NV-TRK-${trackingSuffix}`;
+    const orderId = `ORD-${randomSuffix}-DP`;
+    const trackingNumber = `DP-TRK-${trackingSuffix}`;
 
     const newOrderData: Order = {
       id: orderId,
