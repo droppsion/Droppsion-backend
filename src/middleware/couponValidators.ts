@@ -22,6 +22,39 @@ export const validateCouponCode: RequestHandler = (req, res, next) => {
 };
 
 /**
+ * Validates request payload for checking/applying a coupon (POST /api/coupons/validate).
+ */
+export const validateValidateCoupon: RequestHandler = (req, res, next) => {
+  const errors: ValidationErrorItem[] = [];
+  const body = req.body;
+
+  if (!isObject(body)) {
+    return sendValidationError(res, [
+      { field: 'body', message: 'Request body must be a valid JSON object' },
+    ]);
+  }
+
+  if (!isNonEmptyString(body.code, 1, 50)) {
+    errors.push({ field: 'code', message: 'Coupon code is required and cannot be empty' });
+  }
+
+  if (body.subtotal !== undefined && body.subtotal !== null && body.subtotal !== '') {
+    const subtotal = parseNumeric(body.subtotal);
+    if (subtotal === null || subtotal < 0) {
+      errors.push({ field: 'subtotal', message: 'Cart subtotal must be a non-negative number' });
+    } else {
+      body.subtotal = subtotal;
+    }
+  }
+
+  if (errors.length > 0) {
+    return sendValidationError(res, errors);
+  }
+
+  next();
+};
+
+/**
  * Validates request payload for creating a coupon (POST /api/coupons).
  */
 export const validateCreateCoupon: RequestHandler = (req, res, next) => {
@@ -175,4 +208,3 @@ export const validateUpdateCoupon: RequestHandler = (req, res, next) => {
 
   next();
 };
-

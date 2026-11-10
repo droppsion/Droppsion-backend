@@ -7,7 +7,7 @@ import {
   parseNumeric,
 } from './validate';
 
-const VALID_SUPPLIER_STATUSES = ['connected', 'syncing', 'offline'];
+export const VALID_SUPPLIER_STATUSES = ['connected', 'syncing', 'offline', 'deactivated'];
 
 /**
  * Validates the supplier `:id` parameter.
@@ -44,19 +44,19 @@ export const validateCreateSupplier: RequestHandler = (req, res, next) => {
     });
   }
 
-  // Required: category (string)
-  if (!isNonEmptyString(body.category, 1, 100)) {
+  // Optional: category
+  if (body.category !== undefined && !isNonEmptyString(body.category, 1, 100)) {
     errors.push({
       field: 'category',
-      message: 'Supplier category is required and cannot be empty',
+      message: 'Supplier category cannot be empty',
     });
   }
 
-  // Optional: status ('connected' | 'syncing' | 'offline')
+  // Optional: status ('connected' | 'syncing' | 'offline' | 'deactivated')
   if (body.status !== undefined && !VALID_SUPPLIER_STATUSES.includes(body.status)) {
     errors.push({
       field: 'status',
-      message: `Status must be one of: ${VALID_SUPPLIER_STATUSES.join(', ')}`,
+      message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
     });
   }
 
@@ -70,6 +70,17 @@ export const validateCreateSupplier: RequestHandler = (req, res, next) => {
       });
     } else {
       body.leadTimeHours = hours;
+    }
+  }
+
+  // Optional: performanceRating (0 to 5)
+  if (body.performanceRating !== undefined && body.performanceRating !== null && body.performanceRating !== '') {
+    const rating = parseNumeric(body.performanceRating);
+    if (rating === null || rating < 0 || rating > 5) {
+      errors.push({
+        field: 'performanceRating',
+        message: 'Performance rating must be a number between 0 and 5',
+      });
     }
   }
 
@@ -96,6 +107,7 @@ export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
   // Strip internal immutable identifiers
   if ('_id' in body) delete body._id;
   if ('__v' in body) delete body.__v;
+  if ('id' in body) delete body.id;
 
   if (body.name !== undefined && !isNonEmptyString(body.name, 2, 100)) {
     errors.push({
@@ -114,7 +126,7 @@ export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
   if (body.status !== undefined && !VALID_SUPPLIER_STATUSES.includes(body.status)) {
     errors.push({
       field: 'status',
-      message: `Status must be one of: ${VALID_SUPPLIER_STATUSES.join(', ')}`,
+      message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
     });
   }
 
@@ -137,3 +149,25 @@ export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
   next();
 };
 
+/**
+ * Validates request payload for toggling supplier status (PATCH /api/dropship/suppliers/:id/status).
+ */
+export const validateToggleSupplierStatus: RequestHandler = (req, res, next) => {
+  const errors: ValidationErrorItem[] = [];
+  const body = req.body;
+
+  if (body && isObject(body) && body.status !== undefined) {
+    if (!VALID_SUPPLIER_STATUSES.includes(body.status)) {
+      errors.push({
+        field: 'status',
+        message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
+      });
+    }
+  }
+
+  if (errors.length > 0) {
+    return sendValidationError(res, errors);
+  }
+
+  next();
+};

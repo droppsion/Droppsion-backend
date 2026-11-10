@@ -53,15 +53,12 @@ const DEFAULT_ADMIN_STAFF = [
 export const login = (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Email address is required' });
-    }
+    const cleanEmail = email.trim().toLowerCase();
 
     const user = {
       ...DEMO_USER,
-      email: email.toLowerCase(),
-      name: email.split('@')[0].replace('.', ' ').toUpperCase(),
+      email: cleanEmail,
+      name: cleanEmail.split('@')[0].replace('.', ' ').toUpperCase(),
     };
 
     return res.json({
@@ -77,15 +74,12 @@ export const login = (req: Request, res: Response) => {
 export const register = (req: Request, res: Response) => {
   try {
     const { name, email } = req.body;
-
-    if (!name || !email) {
-      return res.status(400).json({ success: false, message: 'Name and email are required' });
-    }
+    const cleanEmail = email.trim().toLowerCase();
 
     const newUser: UserSession = {
       id: `usr-${Date.now()}`,
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: cleanEmail,
       role: 'customer',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
       token: `mock-jwt-token-${Date.now()}`,
@@ -120,11 +114,6 @@ export const getMe = (req: Request, res: Response) => {
 export const adminLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required' });
-    }
-
     const cleanEmail = email.trim().toLowerCase();
 
     // Check DB first if connected
@@ -156,6 +145,9 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Predefined accounts or valid administrative fallback
     const matched = DEFAULT_ADMIN_STAFF.find((a) => a.email === cleanEmail);
     if (matched) {
+      if (matched.status === 'deactivated') {
+        return res.status(403).json({ success: false, message: 'This admin account has been deactivated.' });
+      }
       return res.json({
         success: true,
         message: 'Admin authentication successful',
@@ -167,7 +159,7 @@ export const adminLogin = async (req: Request, res: Response) => {
       });
     }
 
-    if (cleanEmail.includes('@') && password.length >= 4) {
+    if (cleanEmail.includes('@') && password && password.length >= 4) {
       const fallbackUser = {
         id: `usr_${Date.now()}`,
         name: cleanEmail.split('@')[0].replace('.', ' ').toUpperCase(),
@@ -209,25 +201,48 @@ export const getAdminUsers = async (_req: Request, res: Response) => {
 export const createAdminUser = async (req: Request, res: Response) => {
   try {
     const { name, email, role = 'store_manager' } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ success: false, message: 'Name and email are required' });
-    }
-
     const cleanEmail = email.trim().toLowerCase();
-    const newUser = {
-      id: `usr_staff_${Date.now().toString().slice(-4)}`,
-      name,
-      email: cleanEmail,
-      role,
-      avatar: name.slice(0, 2).toUpperCase(),
-      status: 'active' as const,
-      lastLogin: new Date().toISOString(),
-    };
 
     if (isDbConnected()) {
+      const existing = await AdminUserModel.findOne({ email: cleanEmail });
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: `An admin account with email '${cleanEmail}' already exists.`,
+        });
+      }
+
+      const newUser = {
+        id: `usr_staff_${Date.now().toString().slice(-4)}`,
+        name: name.trim(),
+        email: cleanEmail,
+        role,
+        avatar: name.trim().slice(0, 2).toUpperCase(),
+        status: 'active' as const,
+        lastLogin: new Date().toISOString(),
+      };
+
       const created = await AdminUserModel.create(newUser);
       return res.status(201).json({ success: true, source: 'mongodb', user: created });
     }
+
+    const existingMem = DEFAULT_ADMIN_STAFF.find((u) => u.email === cleanEmail);
+    if (existingMem) {
+      return res.status(409).json({
+        success: false,
+        message: `An admin account with email '${cleanEmail}' already exists.`,
+      });
+    }
+
+    const newUser = {
+      id: `usr_staff_${Date.now().toString().slice(-4)}`,
+      name: name.trim(),
+      email: cleanEmail,
+      role,
+      avatar: name.trim().slice(0, 2).toUpperCase(),
+      status: 'active' as const,
+      lastLogin: new Date().toISOString(),
+    };
 
     DEFAULT_ADMIN_STAFF.unshift(newUser);
     return res.status(201).json({ success: true, source: 'memory', user: newUser });
@@ -239,7 +254,17 @@ export const createAdminUser = async (req: Request, res: Response) => {
 export const updateAdminUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    delete updates._id;
+    delete updates.__v;
+    delete updates.id;
+
+    if (updates.email) {
+      updates.email = updates.email.trim().toLowerCase();
+    }
+    if (updates.name) {
+      updates.name = updates.name.trim();
+    }
 
     if (isDbConnected()) {
       const updated = await AdminUserModel.findOneAndUpdate(
@@ -271,6 +296,14 @@ export const deleteAdminUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
+    // Protection rule: Never allow deleting the primary super_admin
+    if (id === 'usr_super_01') {
+      return res.status(403).json({
+        success: false,
+        message: 'The primary system Super Admin account cannot be deleted.',
+      });
+    }
+
     if (isDbConnected()) {
       const deleted = await AdminUserModel.findOneAndDelete({ id });
       if (!deleted) {
@@ -297,6 +330,14 @@ export const deleteAdminUser = async (req: Request, res: Response) => {
 export const toggleAdminUserStatus = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    // Protection rule: Never allow deactivating the primary super_admin
+    if (id === 'usr_super_01') {
+      return res.status(403).json({
+        success: false,
+        message: 'The primary system Super Admin account cannot be deactivated.',
+      });
+    }
 
     if (isDbConnected()) {
       const user = await AdminUserModel.findOne({ id });
