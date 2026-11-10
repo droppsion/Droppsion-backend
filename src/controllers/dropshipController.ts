@@ -63,7 +63,10 @@ export const createSupplier = async (req: Request, res: Response) => {
 export const updateSupplier = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    delete updates._id;
+    delete updates.__v;
+    delete updates.id;
 
     if (isDbConnected()) {
       const updated = await SupplierModel.findOneAndUpdate(

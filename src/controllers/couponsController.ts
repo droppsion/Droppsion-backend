@@ -156,7 +156,10 @@ export const createCoupon = async (req: Request, res: Response) => {
 export const updateCoupon = async (req: Request, res: Response) => {
   try {
     const { code } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    delete updates._id;
+    delete updates.__v;
+    delete updates.code;
     const cleanCode = code.trim().toUpperCase();
 
     if (isDbConnected()) {

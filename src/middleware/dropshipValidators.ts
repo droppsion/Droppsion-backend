@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -12,7 +12,7 @@ export const VALID_SUPPLIER_STATUSES = ['connected', 'syncing', 'offline', 'deac
 /**
  * Validates the supplier `:id` parameter.
  */
-export const validateSupplierId: RequestHandler = (req, res, next) => {
+export const validateSupplierId: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   if (!id || typeof id !== 'string' || id.trim() === '') {
     return sendValidationError(res, [
@@ -26,7 +26,7 @@ export const validateSupplierId: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for creating a supplier (POST /api/dropship/suppliers).
  */
-export const validateCreateSupplier: RequestHandler = (req, res, next) => {
+export const validateCreateSupplier: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -56,7 +56,7 @@ export const validateCreateSupplier: RequestHandler = (req, res, next) => {
   if (body.status !== undefined && !VALID_SUPPLIER_STATUSES.includes(body.status)) {
     errors.push({
       field: 'status',
-      message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
+      message: `Status must be one of: ${VALID_SUPPLIER_STATUSES.join(', ')}`,
     });
   }
 
@@ -73,15 +73,20 @@ export const validateCreateSupplier: RequestHandler = (req, res, next) => {
     }
   }
 
-  // Optional: performanceRating (0 to 5)
-  if (body.performanceRating !== undefined && body.performanceRating !== null && body.performanceRating !== '') {
-    const rating = parseNumeric(body.performanceRating);
-    if (rating === null || rating < 0 || rating > 5) {
-      errors.push({
-        field: 'performanceRating',
-        message: 'Performance rating must be a number between 0 and 5',
-      });
-    }
+  // Optional: fulfillmentCenter
+  if (body.fulfillmentCenter !== undefined && !isNonEmptyString(body.fulfillmentCenter, 1, 100)) {
+    errors.push({
+      field: 'fulfillmentCenter',
+      message: 'Fulfillment center must be a valid string',
+    });
+  }
+
+  // Optional: country
+  if (body.country !== undefined && !isNonEmptyString(body.country, 1, 100)) {
+    errors.push({
+      field: 'country',
+      message: 'Country must be a valid string',
+    });
   }
 
   if (errors.length > 0) {
@@ -94,7 +99,7 @@ export const validateCreateSupplier: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for updating a supplier (PUT /api/dropship/suppliers/:id).
  */
-export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
+export const validateUpdateSupplier: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -126,7 +131,7 @@ export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
   if (body.status !== undefined && !VALID_SUPPLIER_STATUSES.includes(body.status)) {
     errors.push({
       field: 'status',
-      message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
+      message: `Status must be one of: ${VALID_SUPPLIER_STATUSES.join(', ')}`,
     });
   }
 
@@ -152,7 +157,7 @@ export const validateUpdateSupplier: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for toggling supplier status (PATCH /api/dropship/suppliers/:id/status).
  */
-export const validateToggleSupplierStatus: RequestHandler = (req, res, next) => {
+export const validateToggleSupplierStatus: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -160,7 +165,7 @@ export const validateToggleSupplierStatus: RequestHandler = (req, res, next) => 
     if (!VALID_SUPPLIER_STATUSES.includes(body.status)) {
       errors.push({
         field: 'status',
-        message: 'Status must be one of: ' + VALID_SUPPLIER_STATUSES.join(', '),
+        message: `Status must be one of: ${VALID_SUPPLIER_STATUSES.join(', ')}`,
       });
     }
   }

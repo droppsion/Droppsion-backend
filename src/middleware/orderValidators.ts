@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -21,7 +21,7 @@ const VALID_ORDER_STATUSES = [
 /**
  * Validates the `:id` parameter for order lookup, update, and deletion.
  */
-export const validateOrderId: RequestHandler = (req, res, next) => {
+export const validateOrderId: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   if (!id || typeof id !== 'string' || id.trim() === '') {
     return sendValidationError(res, [
@@ -35,7 +35,7 @@ export const validateOrderId: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for creating an order (POST /api/orders).
  */
-export const validateCreateOrder: RequestHandler = (req, res, next) => {
+export const validateCreateOrder: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -135,7 +135,7 @@ export const validateCreateOrder: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for updating order status (PATCH /api/orders/:id/status).
  */
-export const validateUpdateOrderStatus: RequestHandler = (req, res, next) => {
+export const validateUpdateOrderStatus: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 

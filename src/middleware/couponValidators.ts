@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -10,7 +10,7 @@ import {
 /**
  * Validates the `:code` parameter.
  */
-export const validateCouponCode: RequestHandler = (req, res, next) => {
+export const validateCouponCode: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { code } = req.params;
   if (!code || typeof code !== 'string' || code.trim() === '') {
     return sendValidationError(res, [
@@ -24,7 +24,7 @@ export const validateCouponCode: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for checking/applying a coupon (POST /api/coupons/validate).
  */
-export const validateValidateCoupon: RequestHandler = (req, res, next) => {
+export const validateValidateCoupon: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -57,7 +57,7 @@ export const validateValidateCoupon: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for creating a coupon (POST /api/coupons).
  */
-export const validateCreateCoupon: RequestHandler = (req, res, next) => {
+export const validateCreateCoupon: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -138,7 +138,7 @@ export const validateCreateCoupon: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for updating a coupon (PUT /api/coupons/:code).
  */
-export const validateUpdateCoupon: RequestHandler = (req, res, next) => {
+export const validateUpdateCoupon: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 

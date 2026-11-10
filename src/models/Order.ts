@@ -69,7 +69,7 @@ const OrderSchema = new Schema<IOrderDocument>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: (_doc, ret: Record<string, any>) => {
+      transform: (_doc: any, ret: Record<string, any>) => {
         delete ret._id;
         delete ret.__v;
         return ret;

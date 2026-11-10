@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import productsRoutes from './productsRoutes';
 import ordersRoutes from './ordersRoutes';
 import couponsRoutes from './couponsRoutes';
@@ -18,7 +18,7 @@ router.use('/auth', authRoutes);
 router.use('/reviews', reviewsRoutes);
 
 // Database Health & Status
-router.get('/db/status', (_req, res) => {
+router.get('/db/status', (_req: Request, res: Response) => {
   const status = getDbStatus();
   res.json({
     success: true,
@@ -28,7 +28,7 @@ router.get('/db/status', (_req, res) => {
 });
 
 // Trigger Database Seeding (Admin & Setup)
-router.post('/db/seed', async (_req, res) => {
+router.post('/db/seed', async (_req: Request, res: Response) => {
   try {
     if (!isDbConnected()) {
       return res.status(503).json({
@@ -52,7 +52,7 @@ router.post('/db/seed', async (_req, res) => {
 });
 
 // Meta API Info
-router.get('/', (_req, res) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({
     name: 'NovaTrend Dropshipping Engine API',
     version: '1.0.0',

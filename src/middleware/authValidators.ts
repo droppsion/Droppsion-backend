@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -13,7 +13,7 @@ const VALID_ADMIN_STATUSES = ['active', 'deactivated'];
 /**
  * Validates admin user ID parameter.
  */
-export const validateAdminUserId: RequestHandler = (req, res, next) => {
+export const validateAdminUserId: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   if (!id || typeof id !== 'string' || id.trim() === '') {
     return sendValidationError(res, [
@@ -27,7 +27,7 @@ export const validateAdminUserId: RequestHandler = (req, res, next) => {
 /**
  * Validates admin login credentials.
  */
-export const validateAdminLogin: RequestHandler = (req, res, next) => {
+export const validateAdminLogin: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -61,7 +61,7 @@ export const validateAdminLogin: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for creating an admin user.
  */
-export const validateCreateAdminUser: RequestHandler = (req, res, next) => {
+export const validateCreateAdminUser: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -109,7 +109,7 @@ export const validateCreateAdminUser: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for updating an admin user.
  */
-export const validateUpdateAdminUser: RequestHandler = (req, res, next) => {
+export const validateUpdateAdminUser: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -162,7 +162,7 @@ export const validateUpdateAdminUser: RequestHandler = (req, res, next) => {
 /**
  * Validates customer login payload.
  */
-export const validateCustomerLogin: RequestHandler = (req, res, next) => {
+export const validateCustomerLogin: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -189,7 +189,7 @@ export const validateCustomerLogin: RequestHandler = (req, res, next) => {
 /**
  * Validates customer registration payload.
  */
-export const validateCustomerRegister: RequestHandler = (req, res, next) => {
+export const validateCustomerRegister: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 

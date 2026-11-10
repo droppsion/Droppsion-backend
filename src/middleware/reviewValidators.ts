@@ -1,4 +1,4 @@
-﻿import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -7,7 +7,7 @@ import {
   parseNumeric,
 } from './validate';
 
-export const validateReviewProductId: RequestHandler = (req, res, next) => {
+export const validateReviewProductId: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { productId } = req.params;
   if (!productId || typeof productId !== 'string' || productId.trim() === '') {
     return sendValidationError(res, [
@@ -18,7 +18,7 @@ export const validateReviewProductId: RequestHandler = (req, res, next) => {
   next();
 };
 
-export const validateCreateReview: RequestHandler = (req, res, next) => {
+export const validateCreateReview: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -48,14 +48,14 @@ export const validateCreateReview: RequestHandler = (req, res, next) => {
   if (!isNonEmptyString(body.comment, 3, 2000)) {
     errors.push({
       field: 'comment',
-      message: 'Review comment is required and must be at least 3 characters',
+      message: 'Comment must be between 3 and 2000 characters',
     });
   }
 
-  if (body.title !== undefined && !isNonEmptyString(body.title, 1, 150)) {
+  if (body.title !== undefined && !isNonEmptyString(body.title, 1, 200)) {
     errors.push({
       field: 'title',
-      message: 'Review title must be between 1 and 150 characters',
+      message: 'Review title must be a valid string',
     });
   }
 

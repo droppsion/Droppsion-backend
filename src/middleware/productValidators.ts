@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import {
   ValidationErrorItem,
   sendValidationError,
@@ -10,7 +10,7 @@ import {
 /**
  * Validates the `id` param for product lookup, update, delete, and status patch.
  */
-export const validateProductId: RequestHandler = (req, res, next) => {
+export const validateProductId: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   if (!id || typeof id !== 'string' || id.trim() === '') {
     return sendValidationError(res, [
@@ -24,7 +24,7 @@ export const validateProductId: RequestHandler = (req, res, next) => {
 /**
  * Validates the `slug` param for product lookup.
  */
-export const validateProductSlug: RequestHandler = (req, res, next) => {
+export const validateProductSlug: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const { slug } = req.params;
   if (!slug || typeof slug !== 'string' || slug.trim() === '') {
     return sendValidationError(res, [
@@ -38,7 +38,7 @@ export const validateProductSlug: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for creating a product (POST /api/products).
  */
-export const validateCreateProduct: RequestHandler = (req, res, next) => {
+export const validateCreateProduct: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -263,7 +263,7 @@ export const validateCreateProduct: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for updating a product (PUT /api/products/:id).
  */
-export const validateUpdateProduct: RequestHandler = (req, res, next) => {
+export const validateUpdateProduct: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
@@ -504,7 +504,7 @@ export const validateUpdateProduct: RequestHandler = (req, res, next) => {
 /**
  * Validates request payload for toggling product status (PATCH /api/products/:id/status).
  */
-export const validateToggleProductStatus: RequestHandler = (req, res, next) => {
+export const validateToggleProductStatus: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
   const errors: ValidationErrorItem[] = [];
   const body = req.body;
 
