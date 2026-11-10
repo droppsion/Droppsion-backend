@@ -11,7 +11,7 @@ const startServer = async () => {
 
   const server = app.listen(PORT, () => {
     console.log('===============================================');
-    console.log('🚀 NovaTrend Production API Engine is RUNNING!');
+    console.log('🚀 Droppsion Production API Engine is RUNNING!');
     console.log(`📡 URL: http://localhost:${PORT}`);
     console.log(`🩺 Health: http://localhost:${PORT}/health`);
     console.log(`🍃 Environment: ${config.nodeEnv}`);

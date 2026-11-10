@@ -1,7 +1,7 @@
 {
-  "name": "novatrend-dropshipping-backend",
+  "name": "droppsion-dropshipping-backend",
   "version": "1.0.0",
-  "description": "High-performance D2C luxury ecommerce & dropshipping API engine with MongoDB",
+  "description": "High-performance D2C ecommerce & dropshipping API engine for Droppsion with MongoDB",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

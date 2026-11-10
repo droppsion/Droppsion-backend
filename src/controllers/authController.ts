@@ -17,14 +17,14 @@ const DEMO_USER: UserSession = {
   email: 'marcus.vance@example.com',
   role: 'customer',
   avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop',
-  token: 'mock-jwt-token-novatrend-user-session',
+  token: 'mock-jwt-token-droppsion-user-session',
 };
 
 const DEFAULT_ADMIN_STAFF = [
   {
     id: 'usr_super_01',
     name: 'Super Admin',
-    email: 'admin@novatrend.com',
+    email: 'admin@droppsion.com',
     role: 'super_admin',
     avatar: 'SA',
     status: 'active',
@@ -33,7 +33,7 @@ const DEFAULT_ADMIN_STAFF = [
   {
     id: 'usr_director_02',
     name: 'Store Director',
-    email: 'director@novatrend.com',
+    email: 'director@droppsion.com',
     role: 'store_manager',
     avatar: 'SD',
     status: 'active',
@@ -42,7 +42,7 @@ const DEFAULT_ADMIN_STAFF = [
   {
     id: 'usr_ops_03',
     name: 'Logistics Operator',
-    email: 'ops@novatrend.com',
+    email: 'ops@droppsion.com',
     role: 'logistics_operator',
     avatar: 'LO',
     status: 'active',

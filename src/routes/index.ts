@@ -54,7 +54,7 @@ router.post('/db/seed', async (_req: Request, res: Response) => {
 // Meta API Info
 router.get('/', (_req: Request, res: Response) => {
   res.json({
-    name: 'NovaTrend Dropshipping Engine API',
+    name: 'Droppsion Dropshipping Engine API',
     version: '1.0.0',
     status: 'online',
     database: getDbStatus(),
